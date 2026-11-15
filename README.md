@@ -1,88 +1,79 @@
 # Nova Launcher
 
-A native, customizable floating application launcher for Fedora GNOME Shell 51, designed to run independently alongside [Nova](https://github.com/tobiasGuta/N-va).
+Nova Launcher is a native floating app launcher for Fedora with GNOME Shell 51.1 on Wayland. It runs independently of the [Nova](https://github.com/tobiasGuta/N-va) panel extension.
 
-**v0.1 development preview — GNOME Shell 51.1 + Wayland target.**
+## Install or update
 
-## Features
+From the repository root, run the installer as your regular user.
 
-- Rounded, translucent app grid over your wallpaper, with a dim backdrop.
-- GNOME desktop-file discovery and application activation, without hardcoded app names.
-- Search by name and description; category tabs (All, Development, Internet, Utilities, Graphics, Games, Other).
-- Escape to close; arrow keys to select; Enter to launch; click an app to open it.
-- Adjustable width, column count, icon size and opening animation from native GTK4/libadwaita preferences.
-- Opens centered on the current monitor and limits initial rendering to 72 apps to keep GNOME Shell responsive.
-- Regular shortcut **Super + Shift + P**, enabled by default.
-- Optional **experimental Super-only** interception, disabled by default. It blocks an existing overlay-key signal handler for the running GNOME session and unblocks it when disabled. The extension does **not** persistently edit Mutter settings.
-- User-local installation; no root privileges, external processes or changes to the companion Nova extension.
+```sh
+bash ./install.sh
+```
 
-The panel uses translucency, **not genuine background blur**. The experimental Super interception is not tested on the user's desktop and can conflict with extensions that modify the same signal. Do not enable other Super-remapping extensions at the same time.
+Log out of GNOME and back in to load the installed code. On a first install, enable Nova Launcher in the Extensions app or run the following command.
 
-## Install on Fedora
+```sh
+gnome-extensions enable nova-launcher@tobiasguta.github.io
+```
 
-Verify your session:
+To update an existing installation, pull the latest changes, run the installer again, then log out and back in. Preferences persist across updates.
 
-    echo "$XDG_CURRENT_DESKTOP"
-    gnome-shell --version
-    echo "$XDG_SESSION_TYPE"
+## Use the launcher
 
-Clone and install:
+| Action | Control |
+| --- | --- |
+| Open or close | **Super + Shift + P** |
+| Search by app name, description, or desktop-entry keywords | Start typing |
+| Move from search into the grid | **Down** |
+| Move between app tiles | Arrow keys |
+| Launch the focused app or first search result | **Enter** |
+| Dismiss | **Escape** or click outside |
 
-    git clone https://github.com/tobiasGuta/Nova-Launcher.git
-    cd Nova-Launcher
-    bash ./install.sh
+Nova opens in the active monitor’s work area. The default view starts with GNOME Favorites in dock order, followed by the rest of the app library alphabetically. Category buttons filter the grid. The scrollbar appears when the pointer enters its gutter and stays visible while you drag it.
 
-**Log out and log in again** on Wayland, then enable:
+## Preferences
 
-    gnome-extensions enable nova-launcher@tobiasguta.github.io
+Open Nova Launcher’s settings in the Extensions app or run the following command.
 
-Press **Super + Shift + P**. Check searching, clicking an app, category switching and Escape first.
+```sh
+gnome-extensions prefs nova-launcher@tobiasguta.github.io
+```
 
-Customize settings:
+- **Toggle shortcut** selects the default **Super + Shift + P**, **Ctrl + Alt + Space**, or **Disabled**.
+- **Use Super alone (experimental)** makes a tap of **Super** toggle Nova in place of the GNOME Overview. It defaults to off. Turn it off if another extension manages Super.
+- **Frosted glass** blurs the desktop behind the panel. High-contrast mode uses a solid panel automatically.
+- **Launcher width**, **Preferred columns**, **Application icon size**, and **Opening animation** let you adjust the grid. Nova uses fewer columns when space is tight and honors GNOME’s reduced-motion setting.
 
-    gnome-extensions prefs nova-launcher@tobiasguta.github.io
+## Troubleshooting
 
-Only after ordinary shortcut testing, optionally turn on **Use Super alone (experimental)** in Preferences. If it misbehaves, disable that preference or the extension, and log out/in for a clean Shell reset.
+If GNOME is still running an older copy after an update, log out and back in. To inspect Shell errors, run the following command.
 
-## Rollback and troubleshooting
+```sh
+journalctl --user -b /usr/bin/gnome-shell --no-pager --grep='nova.launcher|Nova Launcher'
+```
 
-Disable just this extension:
+To disable Nova Launcher and restore GNOME’s normal Super behavior, use the Extensions app or run the following command.
 
-    gnome-extensions disable nova-launcher@tobiasguta.github.io
+```sh
+gnome-extensions disable nova-launcher@tobiasguta.github.io
+```
 
-This does not disable Nova, Dash to Dock, Blur my Shell, or any other GNOME extensions. The extension normally unblocks GNOME's original overlay-key handler when disabled. Logging out/in resets any in-process signal changes if Shell cleanup was interrupted.
+GNOME 51.1 on Wayland is the tested target. The launcher has been smoke-tested with virtual monitors and alongside Nova, Dash to Dock, and Blur my Shell. Fullscreen behavior and fractional scaling still need desktop testing.
 
-To remove the files:
+## Development
 
-    rm -r "$HOME/.local/share/gnome-shell/extensions/nova-launcher@tobiasguta.github.io"
+Run the same checks as GitHub Actions with Node.js 20+ and `glib-compile-schemas` installed.
 
-For GNOME errors:
+```sh
+npm run check
+bash -n install.sh
+glib-compile-schemas --strict --dry-run schemas/
+python3 -m json.tool metadata.json >/dev/null
+```
 
-    journalctl --user -b /usr/bin/gnome-shell --no-pager | grep -i 'nova.launcher\|Nova Launcher'
-
-For pure JavaScript tests (Node.js 20+):
-
-    npm run check
-
-For the GSettings schema:
-
-    glib-compile-schemas --strict --dry-run schemas/
-
-After editing extension JavaScript on Wayland, log out/in rather than attempting an in-place GNOME Shell restart.
-
-## Project layout
-
-- extension.js — native Shell UI, modal popup, app activation, keybindings and Super interception.
-- lib/catalog.js — filter and grid layout logic.
-- prefs.js — GTK4 / libadwaita settings.
-- stylesheet.css — independent launcher styling.
-- schemas/ — user-local GSettings.
-- tests/ — Node.js catalog unit tests.
-- install.sh — reversible local installation.
-- .github/workflows/ci.yml — syntax, tests and schema validation.
-
-## Limitations
-
-This is a **first prototype**, not a production-tested GNOME extension. Live testing is still required for modal focus, Super-only behavior, multi-monitor positioning, long app names, accessibility and interactions with Nova, Dash to Dock and Blur my Shell. The app grid uses a 72-result display cap; narrow searches to access more. Arrow selection doesn't auto-scroll yet. Category accuracy depends on desktop-file metadata. True blur, favorites, drag and drop, more keyboard configuration and rich appearance settings remain planned.
+- `extension.js` implements the Shell UI, input handling, and app activation.
+- `lib/catalog.js` implements filtering, favorites, and column sizing.
+- `stylesheet.css` styles the Shell UI, and `prefs.js` defines the libadwaita settings.
+- `schemas/` defines GSettings defaults, and `tests/` covers catalog and layout logic.
 
 No license has been selected by the repository owner yet.

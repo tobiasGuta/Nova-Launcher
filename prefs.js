@@ -1,4 +1,5 @@
 import Adw from 'gi://Adw';
+import Gio from 'gi://Gio';
 import Gtk from 'gi://Gtk';
 import {ExtensionPreferences} from 'resource:///org/gnome/Shell/Extensions/js/extensions/prefs.js';
 
@@ -33,7 +34,7 @@ export default class NovaLauncherPreferences extends ExtensionPreferences {
 
         const superRow = new Adw.SwitchRow({
             title:'Use Super alone (experimental)',
-            subtitle:'Overrides GNOME overview only while this extension is enabled',
+            subtitle:'Tap Super to open or close Nova instead of the GNOME Overview',
             active:settings.get_boolean('use-super'),
         });
         superRow.connect('notify::active',() =>
@@ -42,6 +43,12 @@ export default class NovaLauncherPreferences extends ExtensionPreferences {
 
         const appearance = new Adw.PreferencesGroup({title:'Appearance'});
         page.add(appearance);
+        const glass = new Adw.SwitchRow({
+            title: 'Frosted glass',
+            subtitle: 'Blur the desktop behind the launcher',
+        });
+        settings.bind('glass-effect', glass, 'active', Gio.SettingsBindFlags.DEFAULT);
+        appearance.add(glass);
         this._number(appearance,settings,'window-width','Launcher width',
             'Maximum width in logical pixels',520,1100,20);
         this._number(appearance,settings,'columns','Preferred columns',

@@ -1,45 +1,71 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {categoryOf,buildCatalog,searchCatalog,fitColumns} from '../lib/catalog.js';
+import {buildCatalog, categoryOf, favoriteApps, fitColumns, searchCatalog} from '../lib/catalog.js';
 
-const info = (id,name,categories = '',visible = true,description = '') => ({
-    get_id:() => id, get_name:() => name,
-    get_categories:() => categories, get_description:() => description,
-    should_show:() => visible,
+const info = (id, name, options = {}) => ({
+    get_id: () => id,
+    get_name: () => name,
+    get_categories: () => options.categories ?? '',
+    get_description: () => options.description ?? '',
+    get_keywords: () => options.keywords ?? [],
+    should_show: () => options.visible ?? true,
 });
 
-test('filters hidden desktop entries',() => {
-    const result = buildCatalog([
-        info('a.desktop','Editor','Development;'),
-        info('b.desktop','Private','Utility;',false),
+test('filters hidden desktop entries and respects Shell app filtering', () => {
+    const entries = [
+        info('a.desktop', 'Editor'),
+        info('b.desktop', 'Hidden', {visible: false}),
+        info('c.desktop', 'Restricted'),
+    ];
+    const result = buildCatalog(entries, app => app.should_show() && app.get_id() !== 'c.desktop');
+    assert.deepEqual(result.map(item => item.id), ['a.desktop']);
+    assert.deepEqual(buildCatalog(entries).map(item => item.id), ['a.desktop', 'c.desktop']);
+});
+
+test('uses desktop categories', () => {
+    assert.equal(categoryOf('Development;IDE;'), 'Development');
+    assert.equal(categoryOf('Network;WebBrowser;'), 'Internet');
+    assert.equal(categoryOf('AudioVideo;Player;'), 'Multimedia');
+    assert.equal(categoryOf('Office;Spreadsheet;'), 'Office');
+    assert.equal(categoryOf(''), 'Other');
+});
+
+test('search uses descriptions and keywords and prioritizes title prefix', () => {
+    const catalog = buildCatalog([
+        info('1', 'Text Studio', {categories: 'Utility;', description: 'Markdown editor'}),
+        info('2', 'Studio Text', {categories: 'Development;', keywords: ['Markdown', 'IDE']}),
+        info('3', 'Terminal', {categories: 'Utility;'}),
     ]);
-    assert.deepEqual(result.map(item => item.id),['a.desktop']);
+    assert.deepEqual(searchCatalog(catalog, 'studio text').map(a => a.name),
+        ['Studio Text', 'Text Studio']);
+    assert.deepEqual(searchCatalog(catalog, 'markdown IDE').map(a => a.id), ['2']);
+    assert.deepEqual(searchCatalog(catalog, 'markdown', 'Utilities').map(a => a.id), ['1']);
 });
-test('uses desktop categories',() => {
-    assert.equal(categoryOf('Development;IDE;'),'Development');
-    assert.equal(categoryOf('Network;WebBrowser;'),'Internet');
-    assert.equal(categoryOf('AudioVideo;'),'Other');
+
+test('retains more than 72 apps and distinct desktop IDs for duplicate names', () => {
+    const catalog = buildCatalog(Array.from({length: 125}, (_, index) =>
+        info(String(index), 'Same name')));
+    assert.equal(searchCatalog(catalog, '').length, 125);
+    assert.equal(searchCatalog(catalog, 'same name').length, 125);
 });
-test('search matches words and prioritizes title prefix',() => {
-    const data = buildCatalog([
-        info('1','Text Studio','Utility;'),
-        info('2','Studio Text','Development;'),
-        info('3','Terminal','Utility;'),
+
+test('favorites keep dock order and skip missing, restricted, and repeated IDs', () => {
+    const catalog = buildCatalog([
+        info('a.desktop', 'Editor'),
+        info('b.desktop', 'Hidden', {visible: false}),
+        info('c.desktop', 'Terminal'),
+        info('d.desktop', 'Writer'),
     ]);
-    assert.deepEqual(searchCatalog(data,'studio text').items.map(a => a.name),
-        ['Studio Text','Text Studio']);
-    assert.equal(searchCatalog(data,'','Development').total,1);
+    const result = favoriteApps(catalog,
+        ['c.desktop', 'b.desktop', 'missing.desktop', 'c.desktop', 'a.desktop', 'd.desktop'], 2);
+    assert.deepEqual(result.map(item => item.id), ['c.desktop', 'a.desktop']);
 });
-test('caps visible actor count without losing total',() => {
-    const data = Array.from({length:125},(_,i) => ({
-        id:String(i),name:'App '+i,description:'',category:'Other',
-    }));
-    const result = searchCatalog(data,'','All',72);
-    assert.equal(result.items.length,72);
-    assert.equal(result.total,125);
-});
-test('responsive columns fit',() => {
-    assert.equal(fitColumns(820,6),6);
-    assert.equal(fitColumns(350,6),2);
-    assert.equal(fitColumns(820,4),4);
+
+test('responsive columns account for the requested icon size', () => {
+    assert.equal(fitColumns(860, 7), 7);
+    assert.equal(fitColumns(350, 7), 3);
+    assert.equal(fitColumns(350, 7, 80), 3);
+    assert.equal(fitColumns(310, 7, 80), 2);
+    assert.equal(fitColumns(860, 4), 4);
+    assert.equal(fitColumns(120, 7), 1);
 });
