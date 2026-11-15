@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schemalist>
+  <schema id="org.gnome.shell.extensions.nova-launcher" path="/org/gnome/shell/extensions/nova-launcher/">
+    <key name="toggle-shortcut" type="as"><default>['&lt;Super&gt;&lt;Shift&gt;p']</default><summary>Launcher shortcut</summary></key>
+    <key name="use-super" type="b"><default>false</default><summary>Experimental Super-only override</summary></key>
+    <key name="window-width" type="i"><default>820</default><range min="520" max="1100"/><summary>Launcher width</summary></key>
+    <key name="columns" type="i"><default>6</default><range min="3" max="8"/><summary>Preferred columns</summary></key>
+    <key name="icon-size" type="i"><default>56</default><range min="36" max="80"/><summary>Icon size</summary></key>
+    <key name="animation-duration" type="i"><default>180</default><range min="0" max="400"/><summary>Animation milliseconds</summary></key>
+  </schema>
+</schemalist>

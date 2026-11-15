@@ -1,0 +1,22 @@
+.nova-launcher-backdrop { background-color: rgba(9,12,23,0.42); }
+.nova-launcher-panel { background-color: rgba(29,37,52,0.95); border: 1px solid rgba(255,255,255,0.23); border-radius: 26px; padding: 23px; color: #fff; box-shadow: 0 22px 62px rgba(0,0,0,0.50); }
+.nova-launcher-header { spacing: 12px; margin-bottom: 14px; }
+.nova-launcher-title { font-size: 24px; font-weight: bold; color: #fff; }
+.nova-launcher-subtitle { font-size: 12px; color: #c0cad9; }
+.nova-launcher-close { border-radius: 12px; padding: 9px 14px; color: #fff; background-color: rgba(255,255,255,0.12); }
+.nova-launcher-close:hover { background-color: rgba(255,255,255,0.22); }
+.nova-launcher-search { background-color: rgba(7,12,24,0.50); color: #fff; border-radius: 13px; border: 1px solid rgba(255,255,255,0.17); padding: 12px; margin-bottom: 14px; }
+.nova-launcher-search:focus { border-color: #9cc3ff; }
+.nova-launcher-tabs { spacing: 4px; margin-bottom: 14px; }
+.nova-launcher-tab { border-radius: 11px; padding: 8px 10px; color: #c5cddd; background-color: rgba(255,255,255,0.06); font-size: 11px; }
+.nova-launcher-tab:hover { background-color: rgba(255,255,255,0.16); }
+.nova-launcher-tab:active, .nova-launcher-tab:focus { color: #fff; background-color: rgba(116,160,238,0.30); }
+.nova-launcher-scroll { background-color: transparent; }
+.nova-launcher-rows { spacing: 6px; }
+.nova-launcher-app-row { spacing: 4px; }
+.nova-launcher-app { border-radius: 16px; padding: 13px 4px; background-color: transparent; }
+.nova-launcher-app:hover, .nova-launcher-app:selected, .nova-launcher-app:focus { background-color: rgba(255,255,255,0.13); }
+.nova-launcher-icon { margin-bottom: 8px; }
+.nova-launcher-app-name { font-size: 11px; color: #f1f4fa; text-align: center; }
+.nova-launcher-empty { padding: 40px; color: #bdc8d8; }
+.nova-launcher-footer { font-size: 11px; color: #aab5c8; padding-top: 13px; }
