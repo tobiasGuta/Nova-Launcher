@@ -1,0 +1,13 @@
+{
+  "name": "nova-launcher-gnome",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "check": "node --check extension.js && node --check prefs.js && node --check lib/catalog.js && node --test tests/*.test.mjs",
+    "test": "node --test tests/*.test.mjs"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
