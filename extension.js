@@ -59,14 +59,14 @@ export default class NovaLauncher extends Extension {
         this._shade.connect('clicked', () => this._hide());
         this._layer.add_child(this._shade);
         this._panel = new St.BoxLayout({
-            vertical:true, reactive:true, can_focus:true,
+            orientation:Clutter.Orientation.VERTICAL, reactive:true, can_focus:true,
             style_class:'nova-launcher-panel',
         });
         this._panel.set_pivot_point(0.5,0.5);
         this._layer.add_child(this._panel);
 
         const header = new St.BoxLayout({style_class:'nova-launcher-header'});
-        const heading = new St.BoxLayout({vertical:true, x_expand:true});
+        const heading = new St.BoxLayout({orientation:Clutter.Orientation.VERTICAL, x_expand:true});
         heading.add_child(new St.Label({
             text:'Applications', style_class:'nova-launcher-title',
         }));
@@ -117,7 +117,7 @@ export default class NovaLauncher extends Extension {
         });
         this._scroll.set_policy(St.PolicyType.NEVER, St.PolicyType.AUTOMATIC);
         this._rows = new St.BoxLayout({
-            vertical:true, style_class:'nova-launcher-rows',
+            orientation:Clutter.Orientation.VERTICAL, style_class:'nova-launcher-rows',
         });
         this._scroll.set_child(this._rows);
         this._panel.add_child(this._scroll);
@@ -190,7 +190,7 @@ export default class NovaLauncher extends Extension {
                     style_class:'nova-launcher-app', can_focus:true, x_expand:true,
                 });
                 const contents = new St.BoxLayout({
-                    vertical:true, x_align:Clutter.ActorAlign.CENTER,
+                    orientation:Clutter.Orientation.VERTICAL, x_align:Clutter.ActorAlign.CENTER,
                 });
                 contents.add_child(new St.Icon({
                     gicon:item.info.get_icon() || new Gio.ThemedIcon({
@@ -296,7 +296,7 @@ export default class NovaLauncher extends Extension {
         try {
             Main.wm.addKeybinding(
                 'toggle-shortcut',this._settings,Meta.KeyBindingFlags.IGNORE_AUTOREPEAT,
-                Shell.ActionMode.NORMAL | Shell.ActionMode.OVERVIEW,
+                Shell.ActionMode.NORMAL | Shell.ActionMode.OVERVIEW | Shell.ActionMode.POPUP,
                 () => this._toggle());
         } catch (error) {
             console.error('[Nova Launcher] Shortcut unavailable',error);
